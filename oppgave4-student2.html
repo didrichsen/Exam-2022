@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Oppgave 4 - student 2</title>
+	</head>
+	<body>
+		<div id="outputDiv"></div>
+		<div id="outputDiv2"></div>
+	</body>
+	<script>
+		/*
+		Valgte i denne oppgaven å skape det meste innholdet via javascript. 
+		*/
+		const outputDiv = document.getElementById("outputDiv");
+		const outputDiv2 = document.getElementById("outputDiv2");
+
+		/*
+		Oppretter en htmlTxt variabel som jeg bruker gjennom scriptet, et tomt array som fylles med kontoer etterhvert som de opprettes og et array med et objekt som inneholder noen regninger som må betales. 
+		*/
+
+		let htmlTxt = "";
+		const accountArray = [];
+		const billsArray = [
+			{
+				company: "Telenor",
+				type: "Phone",
+				amount: 499,
+			},
+			{
+				company: "Fjordkraft",
+				type: "Electricity",
+				amount: 2000,
+			},
+			{
+				company: "Komplett.no",
+				type: "stuff",
+				amount: 2000,
+			},
+		];
+
+		let totalAmount = 0;
+
+		/*
+
+		Funksjonen under kjøres med en gang nettsiden laster. Du starter med å opprette en account.
+		Det legges til en EventListener på den ene knappen som trigger en annen funksjon for å opprette konto. Den andre funksjonen tar i mot 
+		parametere fra denne funksjonen. Denne funksjonen kalles hver gang en bruker skal opprette en konto.
+
+		*/
+
+		function displayCreateAccountDetails() {
+			outputDiv.innerHTML = `
+		<div><h2>Choose account you would like to create:</h2></div>
+		<select id="account-type" name="choose-account">
+			<option value="regular-account">Regular Account</option>
+			<option value="savings-account">Savings Account</option>
+			<option value="salary-account">Salary Account</option>
+		</select>
+		<label>Transfer amount:</label>
+		<input type="txt" value="0" />
+		<label>Enter personal code</label>
+		<input type="text" />
+		<label>Account Name</label>
+		<input type="text" />
+		<button id="create-account">Create Account</button>`;
+			let inputs = document.getElementsByTagName("input");
+			let createAccountBtn = document.getElementById("create-account");
+			let chooseTypeOption = document.getElementById("account-type");
+			createAccountBtn.addEventListener("click", () => {
+				if (inputs[1].value === "") {
+					outputDiv.innerHTML = "Enter personal code (number and/or characters)";
+					displayOptions();
+					return;
+				}
+				createAccount(`${chooseTypeOption.value}`, `${inputs[2].value}`, parseInt(`${inputs[0].value}`), `${inputs[1].value}`);
+			});
+		}
+
+		/*
+		Funskjonen under trigges via funksjonen ovenfor når det klikkes på createAccount knappen. Funksjonen tar i mot parametere, setter det sammen til et objekt og pusher dette objektet inn
+		i et array som inneholder alle kontoer. 
+
+		*/
+
+		function createAccount(type, accountName, amount, pinCode) {
+			let accountObj = {
+				accountType: type,
+				accountName: accountName,
+				amount: amount,
+				pinCode: pinCode,
+			};
+
+			accountArray.push(accountObj);
+
+			htmlTxt = `<h2>Account created! &#9989</h2>`;
+			displayOptions();
+			totalAmount += amount;
+			outputDiv.innerHTML = htmlTxt;
+		}
+
+		/*
+		Funksjonen under kjøres i de fleste funksjoner for å opprette knapper så man kan navigere seg rundt. Det legges til en EventListener på hver enkelt knapp som trigger en funskjon vi skal se på litt lenger nede som heter "viewCreateOrPayBills()"
+
+		*/
+
+		function displayOptions() {
+			outputDiv2.innerHTML = `
+				<input id="view-accounts" type="submit" value="View Your Accounts" />
+				<input id="pay-bill" type="submit" value="Pay Bills" />
+				<input id="create-account" type="submit" value="Create Account" />
+				<input id="edit-account" type="submit" value="Edit Accounts" />
+		          `;
+			let accounts = document.getElementsByTagName("input");
+			for (let account of accounts) {
+				account.addEventListener("click", viewCreateOrPayBills);
+			}
+		}
+
+		/*
+
+		En funksjon som viser alle kontoer man har opprettet. Sjekker også om det finnes kontoer i konto-arrayet. 
+
+		*/
+
+		function showAllAccounts() {
+			if (accountArray.length === 0) {
+				outputDiv.innerHTML = "<p>No account found. Click Create account</p>";
+				displayOptions();
+				return;
+			}
+			htmlTxt = "";
+			for (let i = 0; i < accountArray.length; i++) {
+				htmlTxt += `
+		                    <table>
+			            <tr>
+				            <th style="border: 0.5px solid black">Account Name</th>
+				            <th style="border: 0.5px solid black">Account type</th>
+				            <th style="border: 0.5px solid black">Amount</th>
+			            </tr>
+			            <tr>
+				            <td style="border: 0.5px solid black">${accountArray[i].accountName}</td>
+				            <td style="border: 0.5px solid black">${accountArray[i].accountType}</td>
+				            <td style="border: 0.5px solid black">${accountArray[i].amount}</td>
+			            </tr>
+		                </table>`;
+			}
+			outputDiv.innerHTML = htmlTxt;
+			displayOptions();
+		}
+
+		/*
+
+		Funksjon for å endre konto-navn eller slette en konto.
+		Bruker showAllAccounts() for å vise alle kontoet, for så å legge til et par knapper for å gjøre endringer. 
+		Valgte her å legge til Eventlistener og samt skrive funksjonen direkte inn i den Eventlistener som knyttes til knappene. De knappene brukes uansett bare på denne siden. 
+
+		*/
+
+		function editAccount() {
+			if (accountArray.length === 0) {
+				outputDiv.innerHTML = "No accounts. Click Create account to get started.";
+				return;
+			}
+			showAllAccounts();
+			htmlTxt += `<p>Here you can change Account Name: </p><input id="old-name" type="text" placeholder="Enter Account Name"><input id="new-name" type="text" placeholder="Enter New Account Name"><button id="change-name">Confirm</button><br><input id="account-to-delete" type="text" placeholder="Enter Account to delete"><button id="delete-account">Delete Account</button>`;
+			outputDiv.innerHTML = htmlTxt;
+			let newName = document.getElementById("new-name");
+			let oldName = document.getElementById("old-name");
+			let changeName = document.getElementById("change-name");
+			let deleteAccount = document.getElementById("delete-account");
+			let delteAccountName = document.getElementById("account-to-delete");
+			changeName.addEventListener("click", () => {
+				for (let i = 0; i < accountArray.length; i++) {
+					if (oldName.value === accountArray[i].accountName) {
+						accountArray[i].accountName = newName.value;
+						editAccount();
+					}
+				}
+			});
+			deleteAccount.addEventListener("click", () => {
+				for (let i = 0; i < accountArray.length; i++) {
+					if (delteAccountName.value === accountArray[i].accountName) {
+						totalAmount -= accountArray[i].amount;
+						accountArray.splice(i, 1);
+						editAccount();
+					}
+				}
+			});
+			htmlTxt = "";
+		}
+
+		/*
+
+		Funksjonen under viser alle regninger man må betale, samt oppretter en knapp for hver enkelt regning som kan brukes for "click to pay". Knappen trigger en annen funskjon som ligger under som heter Paybills(). 
+
+		*/
+
+		function showBills() {
+			if (billsArray.length === 0) {
+				outputDiv.innerHTML = `<h2>Bills to pay, 0 &#9989</h2>`;
+				displayOptions();
+				return;
+			}
+			htmlTxt = "<h2>Bills to pay &#9201</h2>";
+			let numberOfBills = 0;
+			for (let i = 0; i < billsArray.length; i++) {
+				numberOfBills++;
+				htmlTxt += `
+		                      <div>
+		                    <table id="table" style="padding:20px">
+			            <tr>
+				            <th style="border: 0.5px solid black">Company</th>
+				            <th style="border: 0.5px solid black">Type of bill</th>
+				            <th style="border: 0.5px solid black">Amount</th>
+			            </tr>
+			            <tr>
+				            <td style="border: 0.5px solid black">${billsArray[i].company}</td>
+				            <td style="border: 0.5px solid black">${billsArray[i].type}</td>
+				            <td style="border: 0.5px solid black">${billsArray[i].amount}</td>
+			            </tr>
+		                </table>
+		                    <label>Click to pay</label>
+		                    <Button class="payBillBtn" id="${i}">${billsArray[i].amount}</button>
+		                      </div>`;
+			}
+			htmlTxt += `<p>Your balance is a total of: ${totalAmount}</p><p>You got ${numberOfBills} unpaid bills. `;
+			displayOptions();
+			outputDiv.innerHTML = htmlTxt;
+			let buttons = document.getElementsByClassName("payBillBtn");
+			for (let button of buttons) {
+				button.addEventListener("click", paybills);
+			}
+		}
+
+		/*
+
+		Funksjonen under trigges når man klikker på knappen for å betale en regning. Sjekker først om vi har nok penger. 
+		Har man det, så trigges en prompt og passordet må match en av kontoene man har opprettet. Betalingen trekkes fra den kontoen man skriver inn passordet til. 
+		Bruker deretter splice() for å fjerne regningen fra objektet. 
+
+		*/
+
+		function paybills() {
+			console.log(this.id);
+			if (this.innerHTML > totalAmount) return;
+			let passwordInput = prompt("Enter Password");
+			for (let i = 0; i < accountArray.length; i++) {
+				if (passwordInput === accountArray[i].pinCode) {
+					accountArray[i].amount -= this.innerHTML;
+					totalAmount -= this.innerHTML;
+					billsArray.splice(this.id, 1);
+				}
+			}
+			showBills();
+		}
+
+		/*
+
+		Denne funksjonen trigges av knappene som følger gjennom hele appen. Bruker en switch for å sjekke hvilken knapp som ble trykket på, så aktivere den funskjon som hører til den knappen. 
+
+		*/
+
+		function viewCreateOrPayBills() {
+			switch (this.id) {
+				case "create-account":
+					console.log("test");
+					displayCreateAccountDetails();
+					break;
+				case "view-accounts":
+					showAllAccounts();
+					break;
+				case "pay-bill":
+					showBills();
+					break;
+				case "edit-account":
+					editAccount();
+					break;
+			}
+		}
+
+		displayCreateAccountDetails();
+	</script>
+</html>

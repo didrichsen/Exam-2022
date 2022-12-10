@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Oppgave 2 - Miaow Miaow møter fisken</title>
+		<link rel="stylesheet" href="css/oppgave2.css" type="text/css" />
+	</head>
+	<body>
+		<div id="menu-container">
+			<input id="move-left-btn" type="button" value="Venstre" />
+			<input id="move-up-btn" type="button" value="Opp" />
+			<input id="move-right-btn" type="button" value="Høyre" />
+			<input id="move-down-btn" type="button" value="Ned" />
+		</div>
+		<div id="game-container">
+			<p>Antall steg: <span id="number-of-steps-span">0</span></p>
+			<img id="miaow-miaow" src="images/miaow-miaow.png" />
+			<img id="the-mighty-fish" src="images/fish.png" />
+			<h2 id="fish-room-title">Fiskens rom</h2>
+			<div id="line-div"></div>
+		</div>
+		<div id="dialogue-output-div">
+			<p>Miaow Miaow: <span id="miaow-miaow-says">...</span></p>
+			<p>Fisken: <span id="fish-says">...</span></p>
+		</div>
+
+		<script>
+			/*
+
+			Henter inn alle knapper og outputs 
+
+			*/
+			const moveLeftBtn = document.getElementById("move-left-btn");
+			const moveUpBtn = document.getElementById("move-up-btn");
+			const moveRightBtn = document.getElementById("move-right-btn");
+			const moveDownBtn = document.getElementById("move-down-btn");
+
+			const imgCat = document.getElementById("miaow-miaow");
+			const imgFish = document.getElementById("the-mighty-fish");
+
+			const outputFish = document.getElementById("fish-says");
+			const outputCat = document.getElementById("miaow-miaow-says");
+			const outputSteps = document.getElementById("number-of-steps-span");
+
+			let moveLeft = 0;
+			let moveTop = 0;
+			let numberOfSteps = 0;
+
+			/*
+
+			Ut i fra oppgaveteksten ble jeg litt usikker på om vi skal velge random spørsmål OG random svar, eller random spørsmål og et tilhørende svar. Valgte siste, så samtalen gir mening. 
+
+			*/
+
+			catQuestions = [
+				"How long can a fish hold their breath before they come up and say hello to me?",
+				"Do you taste good",
+				"Kiss me, darling?",
+				"Whats your name?",
+				"Whats your favourite sport?",
+			];
+			fishAnswers = [
+				"Forever. Muahaha.",
+				`Ehh... No. All fish in this lake taste aweful!`,
+				"No. You smell fishy!",
+				"Michael Phelps",
+				"Daahh, swimming.",
+			];
+
+			/*
+			Trigger en funksjon som jeg kaller moveCat som bruker en Switch for å sjekke hvilken knapp som ble trykket på. Bruker variablene jeg har skapt som globale for å bevege katten. 
+			UpdateSteps() funksjonen presenteres senere, men den oppdaterer hver gang man gjør et klikk. Det er i denne funksjonene man gjør disse klikkene, så den trigges i hver switch case. 
+
+			*/
+
+			function moveCat() {
+				switch (this) {
+					case moveLeftBtn:
+						if (moveLeft < 50) return;
+						moveLeft -= 50;
+						imgCat.style.left = `${moveLeft}px`;
+						updateSteps();
+
+						break;
+					case moveRightBtn:
+						moveLeft += 50;
+						imgCat.style.left = `${moveLeft}px`;
+						updateSteps();
+						if (moveLeft > 700) {
+							teleportCat();
+							updateSteps();
+						}
+						break;
+					case moveUpBtn:
+						if (moveTop < 50) return;
+						moveTop -= 50;
+						imgCat.style.top = `${moveTop}px`;
+						updateSteps();
+
+						break;
+					case moveDownBtn:
+						if (moveTop >= 500) return;
+						moveTop += 50;
+						imgCat.style.top = `${moveTop}px`;
+						updateSteps();
+						break;
+				}
+			}
+
+			/*
+
+			Denne trigges i den ene switch casen hvis jeg er for nærme fisken. Da teleporteres jeg tilbake til start. 
+			
+			*/
+
+			function teleportCat() {
+				moveLeft = 0;
+				moveTop = 0;
+				imgCat.style.left = `${moveLeft}px`;
+				imgCat.style.top = `${moveTop}px`;
+				outputFish.innerHTML = `<p>Hey you cat! Don't come to close! Not further than 700 pixels.</p> <p>Yeah, that right. Fish thinks in pixels!</p>`;
+			}
+
+			/*
+
+			Utskrift av dialog. Valgte å lage en random index som jeg bruker i arrayet med spørsmål og svar. 
+
+			*/
+
+			function smallTalk() {
+				if (moveLeft < 600) {
+					outputFish.innerHTML = `<p><b>I cant hear you. You are to far away!</b></p>`;
+					return;
+				}
+				let randomIndex = Math.floor(Math.random() * `${catQuestions.length - 1}` + 1);
+				let htmlTxt = catQuestions[randomIndex];
+				let htmlTxt2 = fishAnswers[randomIndex];
+				outputCat.innerHTML = `<p>${htmlTxt}</p>`;
+				outputFish.innerHTML = `<p>${htmlTxt2}</p>`;
+			}
+
+			/*
+
+			Oppdaterer steps hver gang katten beveger seg. Det er med vilje at den ikke nullstilles når den teleporteres tilbake til start. 
+			Tenker at det er et spill og da må man også se hvor mange skritt man har brukt selv om man går for langt. 
+
+			*/
+
+			function updateSteps() {
+				numberOfSteps++;
+				outputSteps.innerHTML = `${numberOfSteps}`;
+			}
+
+			moveLeftBtn.onclick = moveCat;
+			moveRightBtn.onclick = moveCat;
+			moveDownBtn.onclick = moveCat;
+			moveUpBtn.onclick = moveCat;
+			imgFish.onclick = smallTalk;
+		</script>
+	</body>
+</html>
